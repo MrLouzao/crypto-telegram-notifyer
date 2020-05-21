@@ -10,7 +10,7 @@ Server that runs and checks the price of configured coins.
 ## How to install locally
 
 
-**Required:** first install BeeGo
+**Required:** first install BeeGo and Bee client
 
 ```
 go get github.com/astaxie/beego
@@ -21,6 +21,5 @@ go get github.com/astaxie/beego
 To build and run the project, execute:
 
 ```
-go build main.go
-./main
+$ bee run
 ```
