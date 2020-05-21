@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"crypto-telegram-notifyer/coingecko"
+
 	"github.com/astaxie/beego"
 )
 
@@ -15,7 +17,7 @@ type CoinController struct {
 
 // Definition of a response with data
 type CoinResponse struct {
-	Symbol   string `json:"symbol"`
+	Name     string `json:"symbol"`
 	UsdPrice string `json:"usd_price"`
 	BtcPrice string `json:"btc_price"`
 }
@@ -23,17 +25,6 @@ type CoinResponse struct {
 type ErrorMsg struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
-}
-
-// Method to call to CoinGecko API and retrieve data
-func _obtain_coin_price(symbol *string) CoinResponse {
-	// TODO call to the correspondent API
-	mockBtcPrice := CoinResponse{
-		Symbol:   strings.ToUpper(*symbol),
-		UsdPrice: "100k",
-		BtcPrice: "1.00000000000",
-	}
-	return mockBtcPrice
 }
 
 // Extract all coins from array splitting by comma
@@ -64,15 +55,30 @@ func _send_403_error_response(writer http.ResponseWriter, errMessage string) {
 	writer.Write([]byte(errJson))
 }
 
+func _send_500_error_response(writer http.ResponseWriter, errMessage string) {
+	errJson := `{"code": 500 ,"message": "` + errMessage + `"}`
+	writer.WriteHeader(500)
+	writer.Write([]byte(errJson))
+}
+
 // For each coin, retrieve a CoinResponse object
-func _obtain_coin_list_prices(coinList []string) *[]CoinResponse {
-	var coinPricesList = make([]CoinResponse, len(coinList))
+func _obtain_coin_list_prices(coinList []string) (*[]CoinResponse, error) {
+	coinPricesList, err := coingecko.GetCoinsPrices(coinList)
 
-	for i, coinSymbol := range coinList {
-		coinPricesList[i] = _obtain_coin_price(&coinSymbol)
+	if err != nil {
+		return nil, errors.New("Error while calling to Coingecko's API")
+	} else {
+
+		var coinPricesListToReturn = make([]CoinResponse, len(*coinPricesList))
+
+		for i, coinPriceResponse := range *coinPricesList {
+			// Cast between interfaces
+			coinResponseCasted := CoinResponse(coinPriceResponse)
+			coinPricesListToReturn[i] = coinResponseCasted
+		}
+
+		return &coinPricesListToReturn, nil
 	}
-
-	return &coinPricesList
 }
 
 // Response for GET:/coins?symbols=btc,lsk
@@ -84,8 +90,14 @@ func (this *CoinController) Get() {
 	if err != nil {
 		_send_403_error_response(this.Ctx.ResponseWriter, err.Error())
 	} else {
-		coinPricesList := _obtain_coin_list_prices(coinSymbolList)
-		this.Data["json"] = *coinPricesList
-		this.ServeJSON()
+
+		coinPricesList, err2 := _obtain_coin_list_prices(coinSymbolList)
+		if err2 != nil {
+			_send_500_error_response(this.Ctx.ResponseWriter, err2.Error())
+		} else {
+			this.Data["json"] = *coinPricesList
+			this.ServeJSON()
+		}
+
 	}
 }
