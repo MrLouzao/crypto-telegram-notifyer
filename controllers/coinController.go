@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"net/http"
 	"regexp"
 	"strings"
 
@@ -46,19 +45,6 @@ func _extract_coin_symbols(allCoinsCommaSeparated string) ([]string, error) {
 	} else {
 		return nil, errors.New("Coin symbol list must not be empty")
 	}
-}
-
-// Generate a 403 error from Response
-func _send_403_error_response(writer http.ResponseWriter, errMessage string) {
-	errJson := `{"code": 403 ,"message": "` + errMessage + `"}`
-	writer.WriteHeader(403)
-	writer.Write([]byte(errJson))
-}
-
-func _send_500_error_response(writer http.ResponseWriter, errMessage string) {
-	errJson := `{"code": 500 ,"message": "` + errMessage + `"}`
-	writer.WriteHeader(500)
-	writer.Write([]byte(errJson))
 }
 
 // For each coin, retrieve a CoinResponse object

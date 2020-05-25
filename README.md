@@ -17,6 +17,7 @@ Server that runs and checks the price of configured coins.
 
 ```
 go get github.com/astaxie/beego
+go get github.com/go-sql-driver/mysql
 go get -u github.com/superoo7/go-gecko
 ```
 
@@ -66,6 +67,56 @@ Example of response:
 ]
 ```
 
+##### GET /alarms
+
+Get all alarms configured on DB
+
+```
+curl localhost:8080/alarms
+```
+
+Example of response:
+
+```
+[
+  // TODO
+]
+```
+
+
+##### POST /alarms
+
+Save a new configured alarm on DB
+
+```
+curl -X POST -H 'Content-Type: application/json' -d '{ "name": "lisk", "type": "BELOW", "against": "btc", "price": 213 }' localhost:8080/alarms
+```
+
+Example of response:
+
+```
+[
+  // TODO
+]
+```
+
+
 #### Coingecko API
 
 Check the API Reference: https://www.coingecko.com/es/api#explore-api
+
+
+## Create DB schema
+
+1. First create the executable to intereact with DB:
+
+```
+go build main.go
+```
+
+2. Check the generated executable:
+
+```
+./main orm
+```
+
