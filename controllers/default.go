@@ -9,7 +9,7 @@ type MainController struct {
 }
 
 func (c *MainController) Get() {
-	c.Data["Website"] = "beego.me"
-	c.Data["Email"] = "luismiguel.louzao.gonzalez@gmail.com"
-	c.TplName = "index.tpl"
+	errJson := `{"code": 404 ,"message": "Resource / not found"}`
+	c.Ctx.ResponseWriter.WriteHeader(404)
+	c.Ctx.ResponseWriter.Write([]byte(errJson))
 }

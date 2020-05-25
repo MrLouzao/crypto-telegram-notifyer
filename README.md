@@ -21,6 +21,12 @@ go get github.com/go-sql-driver/mysql
 go get -u github.com/superoo7/go-gecko
 ```
 
+## Environment variables
+
+**RECREATE_DB**: indicates if the DB must be recreated when running or code changes
+- default value: false
+- example: RECREATE_DB=true
+
 
 #### Build & Run
 
@@ -79,7 +85,27 @@ Example of response:
 
 ```
 [
-  // TODO
+  {
+    "id": 1,
+    "name": "bitisi",
+    "type": "UP",
+    "against": "btc",
+    "price": 1232
+  },
+  {
+    "id": 2,
+    "name": "Amigo",
+    "type": "BELOW",
+    "against": "btc",
+    "price": 213
+  },
+  {
+    "id": 3,
+    "name": "Another test",
+    "type": "BELOW",
+    "against": "btc",
+    "price": 213
+  }
 ]
 ```
 

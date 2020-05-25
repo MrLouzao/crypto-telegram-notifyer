@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"crypto-telegram-notifyer/models"
+	"crypto-telegram-notifyer/services"
+	_ "crypto-telegram-notifyer/services"
 	"encoding/json"
 	"fmt"
 
@@ -14,6 +16,7 @@ type AlarmController struct {
 
 // Create an Alarm POST:/alarms
 func (this *AlarmController) Post() {
+	writer := this.Ctx.ResponseWriter
 	// Get a decoders
 	req := *this.Ctx.Request
 	decoder := json.NewDecoder(req.Body)
@@ -23,27 +26,34 @@ func (this *AlarmController) Post() {
 	err := decoder.Decode(&alarm)
 	if err != nil {
 		fmt.Println(err.Error())
-		_send_403_error_response(this.Ctx.ResponseWriter, "Alarm message format invalid")
+		_send_403_error_response(writer, "Alarm message format invalid")
 	}
 
 	// Check format
 	err = models.CheckPostAlarmDtoFormat(&alarm)
 	if err != nil {
-		_send_403_error_response(this.Ctx.ResponseWriter, err.Error())
+		_send_403_error_response(writer, err.Error())
 	} else {
-		fmt.Println("alarm", alarm)
-		writer := this.Ctx.ResponseWriter
-		errMessage := " Method not ready yet!"
-		errJson := `{"code": 403 ,"message": "` + errMessage + `"}`
-		writer.WriteHeader(403)
-		writer.Write([]byte(errJson))
+		err := services.SaveAlarm(alarm)
+		if err != nil {
+			_send_500_error_response(writer, "Error while inserting on DB")
+		} else {
+			writer.WriteHeader(201)
+		}
 	}
 }
 
 // Return all stored alarms GET:/alarms
 func (this *AlarmController) Get() {
-	var emptyArray = []string{}
-
-	this.Data["json"] = emptyArray
-	this.ServeJSON()
+	res, err := services.GetAllAlarms()
+	if err != nil {
+		writer := this.Ctx.ResponseWriter
+		errMessage := "Cannot connect to DB!"
+		errJson := `{"code": 500 ,"message": "` + errMessage + `"}`
+		writer.WriteHeader(500)
+		writer.Write([]byte(errJson))
+	} else {
+		this.Data["json"] = res
+		this.ServeJSON()
+	}
 }
