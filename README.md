@@ -127,6 +127,17 @@ Example of response:
 ```
 
 
+##### POST /actions
+
+Perform all stored alarms checks
+
+```
+curl -X POST -H 'Content-Type: application/json' localhost:8080/actions
+```
+
+
+No response content provided. 201 http status code as response.
+
 #### Coingecko API
 
 Check the API Reference: https://www.coingecko.com/es/api#explore-api
@@ -143,6 +154,16 @@ go build main.go
 2. Check the generated executable:
 
 ```
-./main orm
+./main orm syncdb
 ```
 
+
+## Generate API documentation
+
+Pending of being implemented! Follow the tutorial: https://beego.me/docs/advantage/docs.md
+
+```
+bee run -downdoc=true -gendoc=true
+```
+
+Access then to: http://localhost:8080/swagger

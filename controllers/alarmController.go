@@ -36,7 +36,7 @@ func (this *AlarmController) Post() {
 	} else {
 		err := services.SaveAlarm(alarm)
 		if err != nil {
-			_send_500_error_response(writer, "Error while inserting on DB")
+			_send_500_error_response(writer, err.Error())
 		} else {
 			writer.WriteHeader(201)
 		}
@@ -56,4 +56,10 @@ func (this *AlarmController) Get() {
 		this.Data["json"] = res
 		this.ServeJSON()
 	}
+}
+
+// Delete a stored alarm  DELETE:/alarms/{alarmId}
+func (this *AlarmController) Delete() {
+	fmt.Println("TODO: implement this endpoint")
+	this.Ctx.ResponseWriter.WriteHeader(200)
 }

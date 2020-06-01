@@ -1,6 +1,7 @@
 package coingecko
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -79,5 +80,54 @@ func GetCoinsPrices(inputSymbols []string) (*[]CoinPriceResponse, error) {
 	} else {
 		var castedCoinPriceResponseList = mapCoinResultToCoinPriceResponse(res)
 		return castedCoinPriceResponseList, nil
+	}
+}
+
+// Cast a response from CoinGecko API to a CoinPriceResponse
+func mapCoinResultToAgainstCoinResponse(coinName string, againstCoin string, res *map[string]map[string]float32) (*CoinPriceResponse, error) {
+	// TODO make all this map
+	coinResponse := (*res)[coinName]
+	coinResponseHasContent := len(coinResponse) > 0
+
+	if !coinResponseHasContent {
+		return nil, errors.New("Cannot find the pair")
+	}
+
+	againstCoinValue := coinResponse[againstCoin]
+	if againstCoinValue == 0 {
+		return nil, errors.New("Cannot find the pair")
+	}
+
+	usdPrice := coinResponse[USD_SYMBOL]
+	btcPrice := coinResponse[USD_SYMBOL]
+	coinPrice := CoinPriceResponse{
+		Name:     coinName,
+		UsdPrice: fmt.Sprintf("%f", usdPrice),
+		BtcPrice: fmt.Sprintf("%f", btcPrice),
+	}
+	return &coinPrice, nil
+}
+
+// Obtain the price of a coin against its pair
+func GetCoinPriceAgainst(coinName string, againstCoin string) (*CoinPriceResponse, error) {
+	httpClient := &http.Client{
+		Timeout: time.Second * 10,
+	}
+	coinGeckoApiClient := coingecko.NewClient(httpClient)
+
+	// Hardcode counterparty symbols
+	coinSymbol := []string{coinName}
+	againstSymbols := []string{againstCoin}
+	res, err := coinGeckoApiClient.SimplePrice(coinSymbol, againstSymbols)
+
+	if err != nil {
+		return nil, err
+	} else {
+		castedCoinPriceResponse, err := mapCoinResultToAgainstCoinResponse(coinName, againstCoin, res)
+		if err != nil {
+			return nil, err
+		} else {
+			return castedCoinPriceResponse, nil
+		}
 	}
 }
