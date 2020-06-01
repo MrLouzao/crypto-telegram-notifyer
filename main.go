@@ -9,6 +9,6 @@ import (
 )
 
 func main() {
-	conf.StartDatabase()
+	go conf.StartDatabase()
 	beego.Run()
 }

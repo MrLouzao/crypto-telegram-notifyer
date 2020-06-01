@@ -1,13 +1,20 @@
 package controllers
 
-import "github.com/astaxie/beego"
+import (
+	"crypto-telegram-notifyer/services"
+
+	"github.com/astaxie/beego"
+)
 
 type HealthController struct {
 	beego.Controller
 }
 
 func (this *HealthController) Get() {
-	this.Ctx.ResponseWriter.WriteHeader(200)
-	okMsg := "Server up and running!"
-	this.Ctx.ResponseWriter.Write([]byte(okMsg))
+	status := services.GetSystemHealth()
+
+	this.Ctx.Output.IsOk()
+	this.Ctx.Output.Header("Content-Type", "application/json;charset=UTF-8")
+	this.Data["json"] = *status
+	this.ServeJSON()
 }
